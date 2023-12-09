@@ -35,7 +35,14 @@ def extrapolate_future_value(sequence):
     return sequence[0][-1]
 
 def extrapolate_past_value(sequence):
-    pass
+    len_sequence = len(sequence)
+    for i in range(len_sequence-1, -1, -1):
+        if i == len_sequence-1:
+            sequence[i].append(0)
+        else:
+            next_val = sequence[i][0] - sequence[i+1][0]
+            sequence[i].insert(0, next_val)
+    return sequence[0][0]
 
 def part1(histories):
     sum = 0
@@ -47,6 +54,11 @@ def part1(histories):
 
 def part2(histories):
     sum = 0
+    for h in histories:
+        res = get_complete_sequence(h)
+        next_val = extrapolate_past_value(res)
+        sum += next_val
+    return sum
     
 
 def main():
@@ -57,6 +69,9 @@ def main():
 
     p1 = part1(histories)
     print(p1)
+
+    p2 = part2(histories)
+    print(p2)
 
 if __name__ == "__main__":
     main()
