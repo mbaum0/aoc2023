@@ -37,6 +37,24 @@ class SpaceGrid:
                 return False
         return True
     
+    def get_empty_rows_between_galaxies(self, g1, g2):
+        count = 0
+        lower = min(g1[1], g2[1])
+        upper = max(g1[1], g2[1])
+        for y in range(lower + 1, upper):
+            if self.is_row_empty(y):
+                count += 1
+        return count
+    
+    def get_empty_cols_between_galaxies(self, g1, g2):
+        count = 0
+        lower = min(g1[0], g2[0])
+        upper = max(g1[0], g2[0])
+        for x in range(lower + 1, upper):
+            if self.is_col_empty(x):
+                count += 1
+        return count
+    
     def get_galaxies(self):
         galaxies = []
         for y in range(self.height):
@@ -45,6 +63,26 @@ class SpaceGrid:
                     galaxies.append((x, y))
         return galaxies
     
+    def expand_space(self, amount):
+        # insert into empty rows
+        empty_rows = []
+        for y in range(self.height):
+            if self.is_row_empty(y):
+                empty_rows.append(y)
+
+        empty_cols = []
+        # insert into empty cols
+        for x in range(self.width):
+            if self.is_col_empty(x):
+                empty_cols.append(x)
+
+        for i, y in enumerate(empty_rows):
+            for j in range(amount):
+                self.insert_row_at(['.'] * self.width, y + i + j)
+
+        for i, x in enumerate(empty_cols):
+            for j in range(amount):
+                self.insert_col_at(['.'] * self.height, x + i + j)
     
     def get_all_galaxy_pairs(self):
         return list(itertools.combinations(self.get_galaxies(), 2))
@@ -55,43 +93,36 @@ class SpaceGrid:
 def get_galaxy_distance(g1, g2):
     return abs(g1[0] - g2[0]) + abs(g1[1] - g2[1])
 
-def expand_space(spaceGrid, amount):
-    # insert into empty rows
-    empty_rows = []
-    for y in range(spaceGrid.height):
-        if spaceGrid.is_row_empty(y):
-            empty_rows.append(y)
 
-    for i, y in enumerate(empty_rows):
-        for j in range(amount):
-            spaceGrid.insert_row_at(['.'] * spaceGrid.width, y + i + j)
-
-    empty_cols = []
-    # insert into empty cols
-    for x in range(spaceGrid.width):
-        if spaceGrid.is_col_empty(x):
-            empty_cols.append(x)
-
-    for i, x in enumerate(empty_cols):
-        for j in range(amount):
-            spaceGrid.insert_col_at(['.'] * spaceGrid.height, x + i + j)
 
 def part2(spaceGrid):
-    expand_space(spaceGrid, 1000000)
     pairs = spaceGrid.get_all_galaxy_pairs()
     sum = 0
+    multiplier = 10
     for pair in pairs:
-        sum += get_galaxy_distance(pair[0], pair[1])
+        sum += get_galaxy_distance(pair[0], pair[1]) 
+        sum += (spaceGrid.get_empty_rows_between_galaxies(pair[0], pair[1])*multiplier) + (spaceGrid.get_empty_cols_between_galaxies(pair[0], pair[1])*multiplier)
     return sum
 
 
 def part1(spaceGrid):
-    expand_space(spaceGrid, 1)
-    pairs = spaceGrid.get_all_galaxy_pairs()
     sum = 0
+    pairs = spaceGrid.get_all_galaxy_pairs()
     for pair in pairs:
         sum += get_galaxy_distance(pair[0], pair[1])
+        sum += spaceGrid.get_empty_rows_between_galaxies(pair[0], pair[1]) + spaceGrid.get_empty_cols_between_galaxies(pair[0], pair[1])
     return sum
+
+
+def get_dist_special(spaceGrid):
+    sums = []
+    pairs = spaceGrid.get_all_galaxy_pairs()
+    for pair in pairs:
+        sum = 0
+        sum += get_galaxy_distance(pair[0], pair[1])
+        sum += spaceGrid.get_empty_rows_between_galaxies(pair[0], pair[1]) + spaceGrid.get_empty_cols_between_galaxies(pair[0], pair[1])
+        sums.append(sum)
+    return sums
 
 
 def main():
