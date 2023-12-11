@@ -98,7 +98,7 @@ def get_galaxy_distance(g1, g2):
 def part2(spaceGrid):
     pairs = spaceGrid.get_all_galaxy_pairs()
     sum = 0
-    multiplier = 10
+    multiplier = 1000000-1
     for pair in pairs:
         sum += get_galaxy_distance(pair[0], pair[1]) 
         sum += (spaceGrid.get_empty_rows_between_galaxies(pair[0], pair[1])*multiplier) + (spaceGrid.get_empty_cols_between_galaxies(pair[0], pair[1])*multiplier)
@@ -112,18 +112,6 @@ def part1(spaceGrid):
         sum += get_galaxy_distance(pair[0], pair[1])
         sum += spaceGrid.get_empty_rows_between_galaxies(pair[0], pair[1]) + spaceGrid.get_empty_cols_between_galaxies(pair[0], pair[1])
     return sum
-
-
-def get_dist_special(spaceGrid):
-    sums = []
-    pairs = spaceGrid.get_all_galaxy_pairs()
-    for pair in pairs:
-        sum = 0
-        sum += get_galaxy_distance(pair[0], pair[1])
-        sum += spaceGrid.get_empty_rows_between_galaxies(pair[0], pair[1]) + spaceGrid.get_empty_cols_between_galaxies(pair[0], pair[1])
-        sums.append(sum)
-    return sums
-
 
 def main():
     grid = []
