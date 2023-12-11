@@ -45,6 +45,7 @@ class SpaceGrid:
                     galaxies.append((x, y))
         return galaxies
     
+    
     def get_all_galaxy_pairs(self):
         return list(itertools.combinations(self.get_galaxies(), 2))
 
@@ -54,7 +55,7 @@ class SpaceGrid:
 def get_galaxy_distance(g1, g2):
     return abs(g1[0] - g2[0]) + abs(g1[1] - g2[1])
 
-def part1(spaceGrid):
+def expand_space(spaceGrid, amount):
     # insert into empty rows
     empty_rows = []
     for y in range(spaceGrid.height):
@@ -62,7 +63,8 @@ def part1(spaceGrid):
             empty_rows.append(y)
 
     for i, y in enumerate(empty_rows):
-        spaceGrid.insert_row_at(['.'] * spaceGrid.width, y + i)
+        for j in range(amount):
+            spaceGrid.insert_row_at(['.'] * spaceGrid.width, y + i + j)
 
     empty_cols = []
     # insert into empty cols
@@ -71,8 +73,20 @@ def part1(spaceGrid):
             empty_cols.append(x)
 
     for i, x in enumerate(empty_cols):
-        spaceGrid.insert_col_at(['.'] * spaceGrid.height, x + i)
-    
+        for j in range(amount):
+            spaceGrid.insert_col_at(['.'] * spaceGrid.height, x + i + j)
+
+def part2(spaceGrid):
+    expand_space(spaceGrid, 1000000)
+    pairs = spaceGrid.get_all_galaxy_pairs()
+    sum = 0
+    for pair in pairs:
+        sum += get_galaxy_distance(pair[0], pair[1])
+    return sum
+
+
+def part1(spaceGrid):
+    expand_space(spaceGrid, 1)
     pairs = spaceGrid.get_all_galaxy_pairs()
     sum = 0
     for pair in pairs:
@@ -90,10 +104,10 @@ def main():
     spaceGrid = SpaceGrid(grid)
 
     p1 = part1(spaceGrid)
-    print(p1.__str__())
+    print(p1)
 
-    # p2 = part2(data)
-    # print(p2)
+    p2 = part2(spaceGrid)
+    print(p2)
 
 
 if __name__ == "__main__":
