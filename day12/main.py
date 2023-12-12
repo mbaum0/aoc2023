@@ -14,12 +14,17 @@ class SpringRecord:
 def part2(springs):
     for s in springs:
         s.record *=5
-        s.spring *=5
+        cpy = s.spring
+        for i in range(5):
+            s.spring += "?"
+            s.spring += cpy
 
+
+    max_group_size = max(s.record)
     combo_sum = 0
     for s in springs:
         s.combos = 0
-        for c in gen_combos(s.spring):
+        for c in gen_combos(s.spring, max_group_size=max_group_size):
             if validate_combo(c, s.record):
                 s.combos += 1
         combo_sum += s.combos
@@ -62,9 +67,7 @@ def validate_combo(spring, record):
     
     return True
 
-def gen_combos(spring):
-    possible = []
-
+def gen_combos(spring, max_group_size=-1):
     xs = [i for i, char in enumerate(spring) if char == '?']
 
     replacements = product(['#', '.'], repeat=len(xs))
@@ -73,8 +76,8 @@ def gen_combos(spring):
         res = list(spring)
         for idx, char in zip(xs, replacement):
             res[idx] = char
-        yield ''.join(res)
 
+        yield ''.join(res)
 def main():
     grid = []
     with open(input_file) as f:
@@ -83,15 +86,14 @@ def main():
     records = []
     for r in rows:
         a = r.split(' ')
-        #s = [c for c in a[0]]
         r = a[1].split(',')
         sr = [int(i) for i in r]
         r = SpringRecord(a[0], sr, 0)
         records.append(r)
 
 
-    # p1 = part1(records)
-    # print(p1)
+    p1 = part1(records)
+    print(p1)
 
     p2 = part2(records)
     print(p2)
