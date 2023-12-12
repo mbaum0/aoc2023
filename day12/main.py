@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import math
 from functools import lru_cache
 from itertools import product, groupby
+import time
 
 input_file = "./day12/data.txt"
 
@@ -12,25 +13,23 @@ class SpringRecord:
     combos: int
 
 
-def part2(springs):
+def part2(springs, gen_func):
     combo_sum = 0
     for s in springs:
         s.spring = '?'.join([s.spring for _ in range(5)])
         s.record = tuple(s.record * 5)
 
-        s_sum = gen_combos_rec(s.spring, s.record)
+        s_sum = gen_func(s.spring, s.record)
         combo_sum += s_sum
 
     return combo_sum
 
-def part1(springs):
+def part1(springs, gen_func):
     combo_sum = 0
     for s in springs:
         s.combos = 0
-        for c in gen_combos(s.spring):
-            if validate_combo(c, s.record):
-                s.combos += 1
-        combo_sum += s.combos
+        s.record = tuple(s.record)
+        combo_sum += gen_func(s.spring, s.record)
     return combo_sum
 
 def validate_combo(spring, record):
@@ -82,16 +81,19 @@ def gen_combos_rec(spring, record):
         else:
             return gen_combos_rec(spring[record[0]:], record[1:])
 
-def gen_combos(spring):
+def gen_combos(spring, record):
     xs = [i for i, char in enumerate(spring) if char == '?']
 
     replacements = product(['#', '.'], repeat=len(xs))
+    sum = 0
     for replacement in replacements:
         res = list(spring)
         for idx, char in zip(xs, replacement):
             res[idx] = char
 
-        yield ''.join(res)
+        if validate_combo(''.join(res), record):
+            sum += 1
+    return sum
 
 def main():
     grid = []
@@ -106,11 +108,30 @@ def main():
         r = SpringRecord(a[0], sr, 0)
         records.append(r)
 
-    p1 = part1(records)
-    print(p1)
+    print("Part 1 Slow:")
+    start = time.time()
+    p1 = part1(records, gen_combos)
+    end = time.time()
+    print("Result: %d, Time: %f" % (p1, end - start))
 
-    p2 = part2(records)
-    print(p2)
+    print("Part 2 Slow:")
+    start = time.time()
+    p2 = part2(records, gen_combos)
+    end = time.time()
+    print("Result: %d, Time: %f" % (p1, end - start))
+    
+    print("Part 1 Fast:")
+    start = time.time()
+    p1 = part1(records, gen_combos_rec)
+    end = time.time()
+    print("Result: %d, Time: %f" % (p1, end - start))
+
+    print("Part 2 Fast:")
+    start = time.time()
+    p2 = part2(records, gen_combos_rec)
+    end = time.time()
+    print("Result: %d, Time: %f" % (p1, end - start))
+
 
 
 if __name__ == "__main__":
