@@ -10,6 +10,21 @@ class SpringRecord:
     record: list
     combos: int
 
+
+def part2(springs):
+    for s in springs:
+        s.record *=5
+        s.spring *=5
+
+    combo_sum = 0
+    for s in springs:
+        s.combos = 0
+        for c in gen_combos(s.spring):
+            if validate_combo(c, s.record):
+                s.combos += 1
+        combo_sum += s.combos
+    return combo_sum
+
 def part1(springs):
     combo_sum = 0
     for s in springs:
@@ -75,11 +90,11 @@ def main():
         records.append(r)
 
 
-    p1 = part1(records)
-    print(p1)
+    # p1 = part1(records)
+    # print(p1)
 
-    # p2 = part2(grid)
-    # print(p2)
+    p2 = part2(records)
+    print(p2)
 
 
 if __name__ == "__main__":
