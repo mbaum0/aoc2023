@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import math
+from functools import lru_cache
 from itertools import product, groupby
 
 input_file = "./day12/data.txt"
@@ -12,7 +13,15 @@ class SpringRecord:
 
 
 def part2(springs):
-    pass
+    combo_sum = 0
+    for s in springs:
+        s.spring = '?'.join([s.spring for _ in range(5)])
+        s.record = tuple(s.record * 5)
+
+        s_sum = gen_combos_rec(s.spring, s.record)
+        combo_sum += s_sum
+
+    return combo_sum
 
 def part1(springs):
     combo_sum = 0
@@ -51,6 +60,28 @@ def validate_combo(spring, record):
     
     return True
 
+@lru_cache
+def gen_combos_rec(spring, record):
+    if len(spring) == 0:
+        return 1 if len(record) == 0 else 0
+    if spring.startswith("."):
+        return gen_combos_rec(spring.strip("."), record)
+    if spring.startswith("?"):
+        return gen_combos_rec(spring.replace("?", ".", 1), record) + gen_combos_rec(spring.replace("?", "#", 1), record)
+    if spring.startswith("#"):
+        if len(record) == 0:
+            return 0
+        if len(spring) < record[0]:
+            return 0
+        if any(c == '.' for c in spring[0:record[0]]):
+            return 0
+        if len(record) > 1:
+            if len(spring) < record[0] + 1 or spring[record[0]] == '#':
+                return 0
+            return gen_combos_rec(spring[record[0]+1:], record[1:])
+        else:
+            return gen_combos_rec(spring[record[0]:], record[1:])
+
 def gen_combos(spring):
     xs = [i for i, char in enumerate(spring) if char == '?']
 
@@ -75,12 +106,11 @@ def main():
         r = SpringRecord(a[0], sr, 0)
         records.append(r)
 
-
     p1 = part1(records)
     print(p1)
 
-    # p2 = part2(records)
-    # print(p2)
+    p2 = part2(records)
+    print(p2)
 
 
 if __name__ == "__main__":
