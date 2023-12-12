@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import math
-from itertools import product
+from itertools import product, groupby
 
 input_file = "./day12/data.txt"
 
@@ -12,23 +12,7 @@ class SpringRecord:
 
 
 def part2(springs):
-    for s in springs:
-        s.record *=5
-        cpy = s.spring
-        for i in range(5):
-            s.spring += "?"
-            s.spring += cpy
-
-
-    max_group_size = max(s.record)
-    combo_sum = 0
-    for s in springs:
-        s.combos = 0
-        for c in gen_combos(s.spring, max_group_size=max_group_size):
-            if validate_combo(c, s.record):
-                s.combos += 1
-        combo_sum += s.combos
-    return combo_sum
+    pass
 
 def part1(springs):
     combo_sum = 0
@@ -67,17 +51,17 @@ def validate_combo(spring, record):
     
     return True
 
-def gen_combos(spring, max_group_size=-1):
+def gen_combos(spring):
     xs = [i for i, char in enumerate(spring) if char == '?']
 
     replacements = product(['#', '.'], repeat=len(xs))
-
     for replacement in replacements:
         res = list(spring)
         for idx, char in zip(xs, replacement):
             res[idx] = char
 
         yield ''.join(res)
+
 def main():
     grid = []
     with open(input_file) as f:
@@ -95,8 +79,8 @@ def main():
     p1 = part1(records)
     print(p1)
 
-    p2 = part2(records)
-    print(p2)
+    # p2 = part2(records)
+    # print(p2)
 
 
 if __name__ == "__main__":
