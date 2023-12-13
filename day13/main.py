@@ -7,10 +7,9 @@ import time
 input_file = "./day13/data.txt"
 
 def calc_points(puzzle, index0, index1):
-    points = 1
+    points = index1
     while index0 >= 0 and index1 < len(puzzle):
         if puzzle[index0] == puzzle[index1]:
-            points += 1
             index0 -= 1
             index1 += 1
         else:
@@ -20,31 +19,32 @@ def calc_points(puzzle, index0, index1):
 def get_possible_middles(rows):
     middles = []
     for idx, row in enumerate(rows):
-        if idx == 0 or idx == len(rows)-1:
+        if idx < 0 or idx == len(rows) -1:
             continue
-        if row == rows[idx-1] and row != rows[idx+1]:
+        if row == rows[idx+1]:
             middles.append(idx)
     return middles
 
 
 def part1(puzzles):
     sum = 0
-    for p in puzzles:
+    for idx, p in enumerate(puzzles):
+        psum = 0
         middles = get_possible_middles(p)
         for m in middles:
-            points = calc_points(p, m-1, m)
-        
-            if points > 0:
-                sum += (points * 100)
+            c = calc_points(p, m, m+1)
+            if c > 0:
+                psum += c *100
                 break
-        else:
+        if psum == 0:
             rp = rotate(p)
             middles = get_possible_middles(rp)
+            if len(middles) == 0:
+                print("BAD")
             for m in middles:
-                points = calc_points(rp, m-1, m)
-                if points > 0:
-                    sum += points
-                    break
+                c = calc_points(rp, m, m+1)
+                psum += c
+        sum += psum
     return sum
 
 def rotate(puzzle):
