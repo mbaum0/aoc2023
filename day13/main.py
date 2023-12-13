@@ -6,30 +6,45 @@ import time
 
 input_file = "./day13/data.txt"
 
-
-def reflect(rows, index0, index1):
-    if index0 < 0:
-        return 0
-    if index1 >= len(rows)-1:
-        return index0 + 1
-    if rows[index0] == rows[index1]:
-        return 1 + reflect(rows, index0 - 1, index1 + 1)
-    if rows[index0] != rows[index1] and abs(index0 - index1) > 1:
-        # case where we think we found a middle but failed
-        return -1 * index1
-    else:
-        return reflect(rows, index0+1, index1+1)
+def calc_points(puzzle, index0, index1):
+    points = 1
+    while index0 >= 0 and index1 < len(puzzle):
+        if puzzle[index0] == puzzle[index1]:
+            points += 1
+            index0 -= 1
+            index1 += 1
+        else:
+            return 0
+    return points
+    
+def get_possible_middles(rows):
+    middles = []
+    for idx, row in enumerate(rows):
+        if idx == 0 or idx == len(rows)-1:
+            continue
+        if row == rows[idx-1] and row != rows[idx+1]:
+            middles.append(idx)
+    return middles
 
 
 def part1(puzzles):
     sum = 0
     for p in puzzles:
-        res = reflect(p, 1, 2)
-        res *= 100
-        if res < 0:
-            rP = rotate(p)
-            res = reflect(rP, 1, 2)
-        sum += res
+        middles = get_possible_middles(p)
+        for m in middles:
+            points = calc_points(p, m-1, m)
+        
+            if points > 0:
+                sum += (points * 100)
+                break
+        else:
+            rp = rotate(p)
+            middles = get_possible_middles(rp)
+            for m in middles:
+                points = calc_points(rp, m-1, m)
+                if points > 0:
+                    sum += points
+                    break
     return sum
 
 def rotate(puzzle):
