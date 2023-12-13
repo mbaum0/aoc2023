@@ -8,21 +8,36 @@ input_file = "./day13/data.txt"
 
 
 def reflect(rows, index0, index1):
-    if index0 < 0 or index1 >= len(rows):
-        return 1
+    if index0 < 0:
+        return 0
+    if index1 >= len(rows)-1:
+        return index0 + 1
     if rows[index0] == rows[index1]:
         return 1 + reflect(rows, index0 - 1, index1 + 1)
+    if rows[index0] != rows[index1] and abs(index0 - index1) > 1:
+        # case where we think we found a middle but failed
+        return -1 * index1
     else:
         return reflect(rows, index0+1, index1+1)
 
 
-def part1(vPuzzles, hPuzzles):
+def part1(puzzles):
     sum = 0
-    for v in vPuzzles:
-        sum += reflect(v, 0, 1)
-    for h in hPuzzles:
-        sum += reflect(h, 0, 1) * 100
+    for p in puzzles:
+        res = reflect(p, 1, 2)
+        res *= 100
+        if res < 0:
+            rP = rotate(p)
+            res = reflect(rP, 1, 2)
+        sum += res
     return sum
+
+def rotate(puzzle):
+    newPuzzle = ["" for _ in range(len(puzzle[0]))]
+    for i, l in enumerate(puzzle):
+        for j, c in enumerate(l):
+            newPuzzle[j] += c
+    return newPuzzle
 
 
 def main():
@@ -30,38 +45,18 @@ def main():
         rows = f.read().splitlines()
 
     
-    puzzleChunks = []
+    puzzles = []
 
     chunkIndex = 0
     for row in rows:
         if row == "":
             chunkIndex += 1
             continue
-        if len(puzzleChunks) <= chunkIndex:
-            puzzleChunks.append([])
-        puzzleChunks[chunkIndex].append(row)
+        if len(puzzles) <= chunkIndex:
+            puzzles.append([])
+        puzzles[chunkIndex].append(row)
 
-    
-    verticalPuzzles = []
-    horizontalPuzzles = []
-
-
-    for i, chunk in enumerate(puzzleChunks):
-        if i % 2 == 0:
-            verticalPuzzles.append(chunk)
-        else:
-            horizontalPuzzles.append(chunk)
-
-    # rotate vertical puzzles
-    for idx, vp in enumerate(verticalPuzzles):
-        newVP = ["" for _ in range(len(vp[0]))]
-        for i, l in enumerate(vp):
-            for j, c in enumerate(l):
-                newVP[j] += c
-        verticalPuzzles[idx] = newVP
-
-
-    p1 = part1(verticalPuzzles, horizontalPuzzles)
+    p1 = part1(puzzles)
     print(p1)
 
 
