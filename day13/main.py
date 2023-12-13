@@ -19,12 +19,8 @@ def calc_points(puzzle, index0, index1):
 def calc_points_smudge(puzzle, index0, index1):
     points = index1
     smudge_count = 0
-    while index0 > 0 and index1 < len(puzzle):
-        i0 = set(puzzle[index0])
-        i1 = set(puzzle[index1])
-        diff1 = i0.difference(i1)
-        diff2 = i1.difference(i0)
-        diff = len(diff1.union(diff2))
+    while index0 >= 0 and index1 < len(puzzle):
+        diff = get_row_diff(puzzle[index0], puzzle[index1])
         if diff > 0:
             if smudge_count > 1 or diff > 1:
                 return 0
@@ -49,7 +45,16 @@ def get_possible_middles(rows):
             continue
         if row == rows[idx+1]:
             middles.append(idx)
+        elif (get_row_diff(row, rows[idx+1]) == 1):
+            middles.append(idx)
     return middles
+
+def get_row_diff(r1, r2):
+    count = 0
+    for i, c in enumerate(r1):
+        if c != r2[i]:
+            count += 1
+    return count
 
 def part2(puzzles):
     sum = 0
