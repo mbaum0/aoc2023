@@ -63,16 +63,12 @@ def sum_load(grid):
     return sum
 
 def part2(grid):
-    cycles = 1
+    cycles = 1000000000
     for i in range(cycles):
         grid = roll(grid, 'up')
-        print_grid(grid)
         grid = roll(grid, 'left')
-        print_grid(grid)
         grid = roll(grid, 'down')
-        print_grid(grid)
         grid = roll(grid, 'right')
-        print_grid(grid)
     sum = sum_load(grid)
     return sum
 
