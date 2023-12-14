@@ -87,24 +87,26 @@ def part2(grid):
 def grid_to_str(grid):
     return ''.join([''.join(row) for row in grid])
 
+@lru_cache(maxsize=None)
+def get_hash(gridstr):
+    return hashlib.md5(gridstr.encode()).hexdigest()
+
 def part21(grid):
     # concated grid string
     hash_table = {}
 
     cycles = 1000000000
-    hits = 0
     ways = ["up", "left", "down", "right"]
-    for _ in range(cycles):
+    i = 0
+    while i < cycles:
         for way in ways:
-            if grid_to_str(grid) + way in hash_table:
-                grid = hash_table[grid_to_str(grid) + way]
-                hits += 1
+            h = get_hash(grid_to_str(grid) + way)
+            if h in hash_table:
+                i = cycles - (cycles - i) % (i - hash_table[h])
             else:
-                new_grid = roll(grid, way)
-                hash_table[grid_to_str(grid) + way] = new_grid
-                grid = new_grid
-    print_grid(grid)
-    print(f"hits: {hits}")
+                hash_table[h] = i
+            grid = roll(grid, way)
+        i += 1
     sum = sum_load(grid)
     return sum
 
@@ -131,6 +133,7 @@ def main():
     # p2 = part2(grid)
     # print(p2)
     p21 = part21(grid)
+    print(p21)
 
 
 
