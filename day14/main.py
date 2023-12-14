@@ -3,48 +3,57 @@ import math
 from functools import lru_cache
 from itertools import product, groupby
 import time
+import hashlib
 
 input_file = "./day14/data.txt"
 
-def roll(grid, direction='up'):
-    dy = 0
-    dx = 0
-    startY = 0
-    startX = 0
-    endY = 0
-    endX = 0
-    if direction == 'up':
-        dy = -1
-        endY = len(grid)
-        endX = len(grid[0])
-    elif direction == 'down':
-        dy = 1
-        startY = len(grid) - 1
-        endY = -1
-        endX = len(grid[0])
-    elif direction == 'left':
-        dx = -1
-        endY = len(grid)
-        endX = len(grid[0])
-    elif direction == 'right':
-        dx = 1
-        endY = len(grid)
-        startX = len(grid[0]) - 1
-        endX = -1
 
-    deltaY = dy*-1 if dy != 0 else 1
-    deltaX = dx*-1 if dx != 0 else 1
-    for y in range(startY, endY, deltaY):
-        row = grid[y]
-        for x in range(startX, endX, deltaX):
-            if grid[y][x] == 'O':
-                newY = y + dy
-                newX = x + dx
-                while (newY >= 0 and newY < len(grid) and newX >= 0 and newX < len(grid[0]) and grid[newY][newX] == '.'):
-                    grid[newY-dy][newX-dx] = '.'
-                    grid[newY][newX] = 'O'
-                    newY += dy
-                    newX += dx
+def roll_rows(grid):
+    new_grid = []
+    for row in grid:
+        new_grid.append(roll_row(tuple(row)))
+    return new_grid
+
+@lru_cache(maxsize=None)
+def roll_row(row):
+    row = list(row)
+    for i in range(len(row)):
+        if i == 0:
+            continue
+        newI = i
+        while(newI > 0 and row[newI] == 'O' and row[newI-1] == '.'):
+            row[newI] = '.'
+            row[newI-1] = 'O'
+            newI -= 1
+    return row
+
+
+def rotate(grid, amt):
+    mat = grid
+    for _ in range(amt % 4):
+        transposed = [list(row) for row in zip(*mat)]
+        mat = [row[::-1] for row in transposed]
+
+    return mat  
+            
+
+def roll(grid, direction='up'):
+    if direction == 'up':
+        grid = rotate(grid, 3)
+        grid = roll_rows(grid)
+        grid = rotate(grid, 1)
+    elif direction == 'down':
+        grid = rotate(grid, 1)
+        grid = roll_rows(grid)
+        grid = rotate(grid, 3)
+    elif direction == 'left':
+        grid = roll_rows(grid)
+
+    elif direction == 'right':
+        grid = rotate(grid, 2)
+        grid = roll_rows(grid)
+        grid = rotate(grid, 2)
+
     return grid
 
 def print_grid(grid):
@@ -69,12 +78,44 @@ def part2(grid):
         grid = roll(grid, 'left')
         grid = roll(grid, 'down')
         grid = roll(grid, 'right')
+        if i % 100000 == 0:
+            print(i)
+    sum = sum_load(grid)
+    return sum
+
+
+def grid_to_str(grid):
+    return ''.join([''.join(row) for row in grid])
+
+def part21(grid):
+    # concated grid string
+    hash_table = {}
+
+    cycles = 1000000000
+    hits = 0
+    ways = ["up", "left", "down", "right"]
+    for _ in range(cycles):
+        for way in ways:
+            if grid_to_str(grid) + way in hash_table:
+                grid = hash_table[grid_to_str(grid) + way]
+                hits += 1
+            else:
+                new_grid = roll(grid, way)
+                hash_table[grid_to_str(grid) + way] = new_grid
+                grid = new_grid
+    print_grid(grid)
+    print(f"hits: {hits}")
     sum = sum_load(grid)
     return sum
 
 def part1(grid):
-    grid = roll(grid)
+    print_grid(grid)
+    grid = rotate(grid, 3)
+    for idx, y in enumerate(grid):
+        grid[idx] = roll_row(tuple(y))
+    grid = rotate(grid, 1)
     sum = sum_load(grid)
+    print_grid(grid)
     return sum
 
 def main():
@@ -87,8 +128,9 @@ def main():
 
     # p1 = part1(grid)
     # print(p1)
-    p2 = part2(grid)
-    print(p2)
+    # p2 = part2(grid)
+    # print(p2)
+    p21 = part21(grid)
 
 
 
